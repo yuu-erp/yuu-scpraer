@@ -10,7 +10,6 @@ const readScrapers = <T>(
   relativePath: string,
 ): Record<MangaScraperId | AnimeScraperId, T> => {
   const absolutePath = handlePath(relativePath);
-  console.log('absolutePath: ', absolutePath);
   if (!fs.existsSync(absolutePath)) {
     console.warn(`Directory ${absolutePath} does not exist.`);
     return {};

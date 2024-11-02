@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Client, GatewayIntentBits, Events } from 'discord.js';
 import { ConfigurationService } from 'src/config/configuration.service';
-import sources from '../../sources';
+import sources, { MangaScraperId } from '../../sources';
 @Injectable()
 export class DiscordService implements OnModuleInit {
   private client: Client;
@@ -20,7 +20,9 @@ export class DiscordService implements OnModuleInit {
     await this.client.login(this.configurationService.discordBotToken);
     this.setupEventHandlers();
     const mangaScraper = sources.manga;
-    console.log('mangaScraper: ', mangaScraper);
+    const scraper = mangaScraper['nettruyenviet' as MangaScraperId];
+
+    console.log('mangaScraper: ', scraper.scrapeAllMangaPages());
   }
 
   private setupEventHandlers() {

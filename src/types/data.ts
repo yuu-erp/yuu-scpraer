@@ -1,6 +1,5 @@
-export type SourceManga = {
-  titles: string[];
-  sourceId: string;
-  sourceMediaId: string;
-  anilistId?: number;
-};
+export type SourceManga = {};
+export type SourceAnime = {};
+
+export type Anime = {};
+export type Manga = {};

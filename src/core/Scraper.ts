@@ -133,7 +133,7 @@ export default abstract class Scraper {
    * @param {number} numOfPages - Số lượng trang cần cào.
    * @returns {Promise<SourceManga[] | SourceAnime[]>} - Trả về một Promise chứa mảng `SourceManga` hoặc `SourceAnime`.
    */
-  protected async scrapePages(
+  protected async scrapeNumOfPages(
     numOfPages: number,
   ): Promise<SourceManga[] | SourceAnime[]> {
     const list: SourceManga[] | SourceAnime[] = [];

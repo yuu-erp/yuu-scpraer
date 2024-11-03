@@ -2,6 +2,7 @@ import { AxiosRequestConfig } from 'axios';
 import { MediaType } from 'src/types/anilist';
 import { RequireAtLeastOne } from 'src/types/utils';
 import Scraper from './Scraper';
+import { SourceAnime } from 'src/types/data';
 
 /**
  * Lớp AnimeScraper là lớp trừu tượng kế thừa từ lớp Scraper,
@@ -9,7 +10,7 @@ import Scraper from './Scraper';
  *
  * @abstract
  */
-export default abstract class AnimeScraper extends Scraper {
+export default abstract class AnimeScraper extends Scraper<SourceAnime> {
   /** Kiểu của scraper, trong trường hợp này là anime */
   type: MediaType.Anime;
 

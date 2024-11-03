@@ -1,8 +1,11 @@
 import { AxiosRequestConfig } from 'axios';
+import * as path from 'path';
 import { MediaType } from 'src/types/anilist';
+import { Manga, SourceManga } from 'src/types/data';
 import { RequireAtLeastOne } from 'src/types/utils';
+import { readFile, writeFile } from 'src/utils';
+import AnilistMergeScraper from './AnilistMergeScraper';
 import Scraper from './Scraper';
-import { SourceManga } from 'src/types/data';
 
 export type ImageSource = {
   image: string;
@@ -22,12 +25,14 @@ export type GetImagesQuery = {
  * @abstract
  * @extends {Scraper}
  */
-export default abstract class MangaScraper extends Scraper {
+export default abstract class MangaScraper extends Scraper<SourceManga> {
   /**
    * Định danh loại dữ liệu media là Manga.
    * @type {MediaType.Manga}
    */
   type: MediaType.Manga;
+
+  private anilistMergeScraper: AnilistMergeScraper;
 
   /**
    * Tạo một đối tượng MangaScraper.
@@ -42,13 +47,49 @@ export default abstract class MangaScraper extends Scraper {
     axiosConfig: RequireAtLeastOne<AxiosRequestConfig, 'baseURL'>,
   ) {
     super(id, name, axiosConfig);
+    this.anilistMergeScraper = new AnilistMergeScraper();
   }
 
   async scrapeAllMangaPages() {
     const data = await this.scrapeAllPages();
+    writeFile(
+      `./data/${this.id}.json`,
+      JSON.stringify(data, null, 2),
+      path.resolve(process.cwd(), './'),
+    );
     return data;
   }
 
+  /**
+   * Lấy dữ liệu từ anilist sau đó hợp nhất với dữ liệu từ nguồn
+   * @param nguồn nguồn manga
+   * @returns nguồn manga đã hợp nhất
+   */
+  async scrapeAnilist(sources: SourceManga[]): Promise<Manga[]> {
+    const fullSources: Manga[] = [];
+    if (!sources) {
+      sources = JSON.parse(
+        readFile(`./data/${this.id}.json`, path.resolve(process.cwd(), './')),
+      );
+    }
+    if (!sources?.length) {
+      throw new Error('No sources');
+    }
+    for (const source of sources) {
+      if (!source?.titles?.length) continue;
+      let anilistId: number;
+      if (source.anilistId) {
+        anilistId = source.anilistId;
+      } else {
+        anilistId = await this.anilistMergeScraper.getRetriesId(
+          source.titles,
+          this.type,
+        );
+      }
+      console.log('anilistId: ', anilistId);
+    }
+    return fullSources;
+  }
   /**
    * Phương thức trừu tượng để cào thông tin chi tiết về một manga từ nguồn.
    * Phương thức này phải được thực thi trong các lớp con.

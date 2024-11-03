@@ -1,8 +1,7 @@
-import { LoggerService } from '@nestjs/common';
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 import { errorLogger } from 'axios-logger';
 import axiosRetry from 'axios-retry';
-import { SourceAnime, SourceManga } from 'src/types/data';
+import logger from 'src/lib/logger';
 import { RequireAtLeastOne } from 'src/types/utils';
 
 export const DEFAULT_CONFIG: AxiosRequestConfig = {};
@@ -14,7 +13,7 @@ export const DEFAULT_MONITOR_INTERVAL = 1_200_000;
  *
  * @abstract
  */
-export default abstract class Scraper {
+export default abstract class Scraper<T> {
   /** Axios client để thực hiện các yêu cầu HTTP */
   client: AxiosInstance;
 
@@ -47,9 +46,6 @@ export default abstract class Scraper {
 
   /** Danh sách các ngôn ngữ hỗ trợ của nguồn */
   locales: string[];
-
-  /** Logger dùng để ghi lại các lỗi */
-  private readonly loggerService: LoggerService;
 
   /**
    * Tạo một đối tượng Scraper với các tham số cấu hình.
@@ -85,11 +81,13 @@ export default abstract class Scraper {
 
     const axiosErrorLogger = (error: AxiosError) => {
       return errorLogger(error, {
-        logger: this.loggerService.error.bind(this.loggerService),
+        logger: logger.error.bind(logger),
       });
     };
 
-    this.client.interceptors.request.use((config) => config, axiosErrorLogger);
+    this.client.interceptors.request.use((config) => {
+      return config;
+    }, axiosErrorLogger);
 
     this.client.interceptors.response.use(
       (response) => response,
@@ -101,10 +99,10 @@ export default abstract class Scraper {
    * Cào tất cả các trang manga hoặc anime cho đến khi hết dữ liệu.
    *
    * @protected
-   * @returns {Promise<SourceManga[] | SourceAnime[]>} - Trả về một Promise chứa mảng `SourceManga` hoặc `SourceAnime`.
+   * @returns {Promise<T[]>} - Trả về một Promise chứa mảng kiểu T.
    */
-  protected async scrapeAllPages(): Promise<SourceManga[] | SourceAnime[]> {
-    const list: SourceManga[] | SourceAnime[] = [];
+  protected async scrapeAllPages(): Promise<T[]> {
+    const list: T[] = [];
     let isEnd = false;
     let page = 1;
 
@@ -117,7 +115,7 @@ export default abstract class Scraper {
         }
         console.log(`Scraped page ${page} - ${this.id}`);
         page++;
-        list.push(result);
+        list.push(...result); // Sử dụng spread operator để thêm các phần tử vào list
       } catch (error) {
         isEnd = true;
       }
@@ -131,12 +129,10 @@ export default abstract class Scraper {
    *
    * @protected
    * @param {number} numOfPages - Số lượng trang cần cào.
-   * @returns {Promise<SourceManga[] | SourceAnime[]>} - Trả về một Promise chứa mảng `SourceManga` hoặc `SourceAnime`.
+   * @returns {Promise<T[]>} - Trả về một Promise chứa mảng kiểu T.
    */
-  protected async scrapeNumOfPages(
-    numOfPages: number,
-  ): Promise<SourceManga[] | SourceAnime[]> {
-    const list: SourceManga[] | SourceAnime[] = [];
+  protected async scrapeNumOfPages(numOfPages: number): Promise<T[]> {
+    const list: T[] = [];
 
     for (let page = 1; page <= numOfPages; page++) {
       const result = await this.scrapePage(page);
@@ -144,9 +140,26 @@ export default abstract class Scraper {
       if (result?.length === 0) {
         break;
       }
-      list.push(result);
+      list.push(...result); // Sử dụng spread operator để thêm các phần tử vào list
     }
     return list;
+  }
+
+  /**
+   * Tách tiêu đề trong trường hợp tiêu đề có nhiều tiêu đề (ví dụ: "One Piece | Vua Hải Tặc")
+   * @param title string
+   * @param separators một mảng các dấu phân cách
+   * @returns một mảng các tiêu đề
+   */
+  parseTitle(title: string, separators = ['|', ',', ';', '-', '/']) {
+    const separator = separators.find((separator) => title.includes(separator));
+
+    const regex = new RegExp(`\\${separator}\\s+`);
+
+    return title
+      .split(regex)
+      .map((title) => title.trim())
+      .filter((title) => title);
   }
 
   /**
@@ -154,8 +167,8 @@ export default abstract class Scraper {
    * Phương thức này phải được thực thi trong các lớp con.
    *
    * @abstract
-   * @param {number} _page - Số thứ tự của trang cần cào.
-   * @returns {Promise<SourceManga[] | SourceAnime[]>} - Trả về một Promise chứa mảng `SourceManga` hoặc `SourceAnime`.
+   * @param {number} _page - trang cần cào.
+   * @returns {Promise<T[]>} - Trả về một Promise chứa mảng kiểu T.
    */
-  abstract scrapePage(_page: number): Promise<SourceManga[] | SourceAnime[]>;
+  abstract scrapePage(_page: number): Promise<T[]>;
 }

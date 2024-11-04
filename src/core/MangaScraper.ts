@@ -86,10 +86,20 @@ export default abstract class MangaScraper extends Scraper<SourceManga> {
           this.type,
         );
       }
-      console.log('anilistId: ', anilistId);
+
+      fullSources.push(
+        this.anilistMergeScraper.mergeMangaInfo(source, anilistId),
+      );
     }
+    writeFile(
+      `./data/${this.id}-full.json`,
+      JSON.stringify(fullSources, null, 2),
+      path.resolve(process.cwd(), './'),
+    );
+
     return fullSources;
   }
+
   /**
    * Phương thức trừu tượng để cào thông tin chi tiết về một manga từ nguồn.
    * Phương thức này phải được thực thi trong các lớp con.

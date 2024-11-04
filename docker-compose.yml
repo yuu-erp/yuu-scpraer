@@ -1,0 +1,25 @@
+version: '3.5' # Có thể bỏ dòng này trong các phiên bản Docker Compose mới
+
+services:
+  manga_scraper_db:
+    container_name: manga_scraper_db
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-admin@123}
+      POSTGRES_USER: ${DATABASE_USER:-admin}
+      POSTGRES_DB: ${DATABASE_DB:-manga_scraper_db}
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - manga_scraper_db_data:/var/lib/postgresql/data
+    networks:
+      - manga_scraper_db_network
+    restart: on-failure
+
+volumes:
+  manga_scraper_db_data:
+
+
+networks:
+  manga_scraper_db_network:
+    driver: bridge

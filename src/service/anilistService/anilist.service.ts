@@ -196,12 +196,10 @@ query (
         ...Object.values(media.title),
         ...media.synonyms,
       ]);
-      console.log(bestMatch);
-      console.log(title);
       if (bestMatch.rating < 0.6) {
         return null;
       }
-      console.log('Success', title);
+      console.log('Success', { ...bestMatch, title });
       return media?.id;
     } catch (error) {
       return null;

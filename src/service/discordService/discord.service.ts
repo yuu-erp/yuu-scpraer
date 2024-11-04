@@ -6,7 +6,6 @@ import { readFileAndFallback } from 'src/utils';
 @Injectable()
 export class DiscordService implements OnModuleInit {
   private client: Client;
-
   constructor(private readonly configurationService: ConfigurationService) {
     this.client = new Client({
       intents: [
@@ -39,5 +38,18 @@ export class DiscordService implements OnModuleInit {
       try {
       } catch (error) {}
     });
+  }
+
+  private async sendHelpMessage(message) {
+    const helpMessage = `
+      **Danh sách các lệnh hỗ trợ:**
+      \`!help\` - Hiển thị danh sách các lệnh hỗ trợ.
+      \`!scrapeManga\` - Lấy thông tin tất cả manga từ nguồn.
+      \`!search [tên manga]\` - Tìm kiếm thông tin manga theo tên.
+      \`!latest\` - Xem danh sách các manga mới cập nhật.
+      \`!type\` - Xem danh mục scraper. 
+      ...
+    `;
+    await message.reply(helpMessage);
   }
 }

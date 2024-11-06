@@ -109,7 +109,7 @@ export default abstract class Scraper<T> {
     while (!isEnd) {
       try {
         const result = await this.scrapePage(page);
-        if (!result || !result.length || page === 2) {
+        if (!result || !result.length) {
           isEnd = true;
           break;
         }

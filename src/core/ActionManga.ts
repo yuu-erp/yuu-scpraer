@@ -1,5 +1,5 @@
 import { PrismaService } from 'src/service/prismaService/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Manga } from 'src/types/data';
 
 export default class ActionManga {
   private prismaService: PrismaService;
@@ -8,13 +8,9 @@ export default class ActionManga {
     this.prismaService = new PrismaService();
   }
 
-  async saveMangaWithChapters(dataArray: any[]) {
+  async saveMangaWithChapters(dataArray: Manga[]) {
     try {
-      // await Promise.all(dataArray.map(async (data) => {
-
-      // }));
-
-      console.log('All manga and chapters saved successfully.');
+      console.log('All manga and chapters saved successfully.', dataArray);
     } catch (error) {
       console.error('Error in saveMangaWithChapters:', error);
       throw error;

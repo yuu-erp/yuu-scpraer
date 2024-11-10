@@ -28,6 +28,7 @@ export class DiscordService implements OnModuleInit {
       `./data/nettruyenviet-full.json`,
       () => scraper.scrapeAnilist(manga),
     );
+    console.log('mergedSources: ', mergedSources);
   }
 
   private setupEventHandlers() {

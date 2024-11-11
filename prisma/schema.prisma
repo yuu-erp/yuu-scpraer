@@ -35,5 +35,5 @@ model Chapter {
   manga              Manga   @relation("MangaChapters", fields: [mangaId], references: [id])
   mangaId            String
 
-  @@unique([mangaId, sourceChapterId])
+  @@unique([mangaId, sourceChapterId]) // Đảm bảo rằng mỗi chapter là duy nhất theo cặp này
 }

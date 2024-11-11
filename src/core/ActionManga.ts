@@ -8,9 +8,61 @@ export default class ActionManga {
     this.prismaService = new PrismaService();
   }
 
-  async saveMangaWithChapters(dataArray: Manga[]) {
+  async saveMangaWithChapters(mergedSources: Manga[]) {
     try {
-      console.log('All manga and chapters saved successfully.', dataArray);
+      for (const mangaData of mergedSources) {
+        // Upsert Manga
+        const manga = await this.prismaService.manga.upsert({
+          where: { id: mangaData.sourceMangaConnection.id },
+          update: {
+            sourceId: mangaData.sourceMangaConnection.sourceId,
+            sourceMediaId: mangaData.sourceMangaConnection.sourceMediaId,
+            sourceConnectionId: mangaData.sourceMangaConnection.id,
+            anilistId: mangaData.anilistId ?? null,
+          },
+          create: {
+            id: mangaData.sourceMangaConnection.id,
+            sourceId: mangaData.sourceMangaConnection.sourceId,
+            sourceMediaId: mangaData.sourceMangaConnection.sourceMediaId,
+            sourceConnectionId: mangaData.sourceMangaConnection.id,
+            anilistId: mangaData.anilistId ?? null,
+          },
+        });
+
+        // Upsert Chapters
+        for (const chapter of mangaData.chapters) {
+          await this.prismaService.chapter.upsert({
+            where: {
+              mangaId_sourceChapterId: {
+                mangaId: manga.id, // ID của manga hiện tại
+                sourceChapterId: chapter.sourceChapterId, // ID của chapter trong nguồn
+              },
+            },
+            update: {
+              name: chapter.name,
+              sourceConnectionId: chapter.sourceConnectionId,
+              sourceMediaId: chapter.sourceMediaId,
+              sourceId: chapter.sourceId,
+              slug: chapter.slug,
+            },
+            create: {
+              name: chapter.name,
+              sourceConnectionId: chapter.sourceConnectionId,
+              sourceMediaId: chapter.sourceMediaId,
+              sourceChapterId: chapter.sourceChapterId,
+              sourceId: chapter.sourceId,
+              slug: chapter.slug,
+              mangaId: manga.id,
+            },
+          });
+        }
+        console.log(
+          'manga and chapters saved successfully.' + manga.sourceConnectionId,
+        );
+      }
+
+      console.log('All manga and chapters saved successfully.');
+      return mergedSources;
     } catch (error) {
       console.error('Error in saveMangaWithChapters:', error);
       throw error;

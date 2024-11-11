@@ -3,9 +3,11 @@ import { Client, GatewayIntentBits, Events } from 'discord.js';
 import { ConfigurationService } from 'src/config/configuration.service';
 import sources, { MangaScraperId } from '../../sources';
 import { readFileAndFallback } from 'src/utils';
+import ActionManga from 'src/core/ActionManga';
 @Injectable()
 export class DiscordService implements OnModuleInit {
   private client: Client;
+  private actionManga: ActionManga;
   constructor(private readonly configurationService: ConfigurationService) {
     this.client = new Client({
       intents: [
@@ -14,6 +16,7 @@ export class DiscordService implements OnModuleInit {
         GatewayIntentBits.MessageContent,
       ],
     });
+    this.actionManga = new ActionManga();
   }
 
   async onModuleInit() {
@@ -28,7 +31,7 @@ export class DiscordService implements OnModuleInit {
       `./data/nettruyenviet-full.json`,
       () => scraper.scrapeAnilist(manga),
     );
-    console.log('mergedSources: ', mergedSources);
+    await this.actionManga.saveMangaWithChapters(mergedSources);
   }
 
   private setupEventHandlers() {

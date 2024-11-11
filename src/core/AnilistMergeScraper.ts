@@ -61,7 +61,7 @@ export default class AnilistMergeScraper {
       name: name,
       sourceConnectionId: `${sourceMediaId}-${sourceId}`,
       sourceMediaId,
-      sourceChapterId,
+      sourceChapterId: `${sourceMediaId}-${sourceId}-${sourceChapterId}`,
       sourceId,
       slug: slug,
     };

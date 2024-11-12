@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsInt, Min, Max } from 'class-validator';
+import { IsInt, Min, Max, IsEnum } from 'class-validator';
+import { MangaType } from 'src/types/utils';
 
 export class PaginationPayloadDto {
   @Type(() => Number) // Chuyển đổi kiểu dữ liệu từ chuỗi sang số
@@ -12,4 +13,7 @@ export class PaginationPayloadDto {
   @Min(1)
   @Max(100)
   limit: number;
+
+  @IsEnum(MangaType) // Kiểm tra type phải là một giá trị hợp lệ của enum MangaType
+  type: MangaType;
 }

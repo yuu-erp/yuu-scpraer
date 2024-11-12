@@ -7,3 +7,9 @@ export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
   {
     [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>;
   }[Keys];
+
+export enum MangaType {
+  All = 'all',
+  Anilist = 'anilist',
+  NoAnilist = 'noAnilist',
+}

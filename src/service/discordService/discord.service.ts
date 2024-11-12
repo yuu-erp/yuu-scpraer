@@ -22,16 +22,16 @@ export class DiscordService implements OnModuleInit {
   async onModuleInit() {
     await this.client.login(this.configurationService.discordBotToken);
     this.setupEventHandlers();
-    const mangaScraper = sources.manga;
-    const scraper = mangaScraper['nettruyenviet' as MangaScraperId];
-    const manga = await readFileAndFallback(`./data/nettruyenviet.json`, () =>
-      scraper.scrapeAllMangaPages(),
-    );
-    const mergedSources = await readFileAndFallback(
-      `./data/nettruyenviet-full.json`,
-      () => scraper.scrapeAnilist(manga),
-    );
-    await this.actionManga.saveMangaWithChapters(mergedSources);
+    // const mangaScraper = sources.manga;
+    // const scraper = mangaScraper['nettruyenviet' as MangaScraperId];
+    // const manga = await readFileAndFallback(`./data/nettruyenviet.json`, () =>
+    //   scraper.scrapeAllMangaPages(),
+    // );
+    // const mergedSources = await readFileAndFallback(
+    //   `./data/nettruyenviet-full.json`,
+    //   () => scraper.scrapeAnilist(manga),
+    // );
+    // await this.actionManga.saveMangaWithChapters(mergedSources);
   }
 
   private setupEventHandlers() {

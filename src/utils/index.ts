@@ -45,6 +45,26 @@ export const writeFile = (
   fs.writeFileSync(fileDir, data, { flag: 'w' });
 };
 
+export async function writeJsonInChunks(
+  filePath: string,
+  data: any[],
+  chunkSize: number,
+  basePath?: string,
+) {
+  const chunks = Math.ceil(data.length / chunkSize);
+
+  for (let i = 0; i < chunks; i++) {
+    const chunk = data.slice(i * chunkSize, (i + 1) * chunkSize);
+    const content = JSON.stringify(chunk).slice(1, -1); // Bỏ `[` và `]`
+
+    const mode = i === 0 ? 'w' : 'a'; // Ghi mới ở lần đầu, ghi thêm ở các lần tiếp theo
+    const chunkData =
+      (i > 0 ? ',' : '[') + content + (i === chunks - 1 ? ']' : '');
+
+    writeFile(filePath, chunkData, basePath);
+  }
+}
+
 export const fulfilledPromises = <T extends Promise<any>>(promises: T[]) =>
   Promise.allSettled(promises).then((results) =>
     results

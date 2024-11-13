@@ -3,6 +3,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -20,8 +21,15 @@ export class MangaController {
   @HttpCode(HttpStatus.OK)
   async getAllMangas(
     @Query() query: PaginationPayloadDto,
-    @Query('type') type: MangaType = MangaType.All, // Dùng enum mặc định là 'all'
+    @Query('type') type: MangaType = MangaType.All,
   ) {
     return this.mangaService.getAllMangas(query.page, query.limit, type);
+  }
+
+  @UseGuards(XApiKeyGuard)
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getMangaById(@Param('id') id: string) {
+    return this.mangaService.getMangaById(id);
   }
 }

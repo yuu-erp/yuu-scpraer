@@ -5,5 +5,5 @@ export class MangaResponseDto {
   sourceId: string;
   anilistId: number;
   coverImage: string;
-  title: string[];
+  titles: string[];
 }

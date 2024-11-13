@@ -19,6 +19,8 @@ export default class ActionManga {
             sourceMediaId: mangaData.sourceMangaConnection.sourceMediaId,
             sourceConnectionId: mangaData.sourceMangaConnection.id,
             anilistId: mangaData.anilistId ?? null,
+            coverImage: mangaData.sourceMangaConnection.coverImage,
+            titles: mangaData.sourceMangaConnection.titles,
           },
           create: {
             id: mangaData.sourceMangaConnection.id,
@@ -26,6 +28,8 @@ export default class ActionManga {
             sourceMediaId: mangaData.sourceMangaConnection.sourceMediaId,
             sourceConnectionId: mangaData.sourceMangaConnection.id,
             anilistId: mangaData.anilistId ?? null,
+            coverImage: mangaData.sourceMangaConnection.coverImage,
+            titles: mangaData.sourceMangaConnection.titles,
           },
         });
 

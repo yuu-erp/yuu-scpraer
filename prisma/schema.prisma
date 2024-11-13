@@ -20,7 +20,7 @@ model Manga {
   sourceId           String
   anilistId          Int?
   coverImage         String?
-  title              String[]
+  titles              String[]
   chapters           Chapter[] @relation("MangaChapters")
 }
 

@@ -3,7 +3,7 @@ import * as path from 'path';
 import { MediaType } from 'src/types/anilist';
 import { Manga, SourceManga } from 'src/types/data';
 import { RequireAtLeastOne } from 'src/types/utils';
-import { readFile, writeFile, writeJsonInChunks } from 'src/utils';
+import { readFile, writeFile } from 'src/utils';
 import AnilistMergeScraper from './AnilistMergeScraper';
 import Scraper from './Scraper';
 
@@ -91,13 +91,13 @@ export default abstract class MangaScraper extends Scraper<SourceManga> {
         this.anilistMergeScraper.mergeMangaInfo(source, anilistId),
       );
     }
-    writeJsonInChunks(
-      `./data/${this.id}-full.json`,
-      fullSources,
-      1000,
-      path.resolve(process.cwd(), './'),
-    );
-
+    try {
+      writeFile(
+        `./data/${this.id}-full.json`,
+        JSON.stringify(fullSources, null, 2),
+        path.resolve(process.cwd(), './'),
+      );
+    } catch (error) {}
     return fullSources;
   }
 

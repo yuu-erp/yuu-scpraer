@@ -1,43 +1,55 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { Logger, createLogger, format, transports } from 'winston';
+import { ConfigurationService } from '../../config/configuration.service';
 
 @Injectable()
 export class LoggerService extends ConsoleLogger {
   private logger: Logger;
 
-  constructor() {
+  constructor(private configurationService: ConfigurationService) {
     super();
-    const { combine, timestamp, colorize, printf } = format;
+    const { combine, timestamp, printf, colorize, metadata } = format;
     this.logger = createLogger({
       format: combine(
-        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        printf(
-          ({ level, timestamp, message, correlationId = '', ...metadata }) => {
-            const data =
-              metadata[Symbol.for('splat')]
-                ?.map((item: any) => JSON.stringify(item, null, 2))
-                .join('\n') || '';
+        format.label({
+          label: 'SPS_API_LOGGER',
+        }),
+        timestamp(),
+        metadata(),
+        printf((data) => {
+          const {
+            level,
+            message,
+            [Symbol.for('splat')]: sSplat,
+            metadata: { correlationId, timestamp, label },
+          } = data;
 
-            if (!correlationId) {
-              return `[${timestamp}] [${level.toUpperCase()}] ${message} ${data}`;
-            }
-
-            return `[${timestamp}] [${level.toUpperCase()}] [${correlationId}] ${message} ${data}`;
-          },
-        ),
+          const meta = sSplat[0]
+            .map((item: any) =>
+              JSON.stringify(item, Object.getOwnPropertyNames(item), 2),
+            )
+            .join('\n');
+          return `[${label}] [${timestamp}] [${level.toUpperCase()}]${
+            correlationId ? ` [${correlationId}] ` : ''
+          }${message} ${meta}`;
+        }),
       ),
-      transports: [
-        new transports.Console({
-          level: 'debug',
-          format: colorize({ all: true }),
-        }),
-        new transports.File({
-          filename: 'public/logs/rtc_logs.log',
-          level: 'debug',
-          format: colorize({ all: true }),
-        }),
-      ],
+      transports:
+        this.configurationService.nodeEnv === 'development'
+          ? [
+              new transports.Console({
+                format: colorize({ all: true }),
+              }),
+              new transports.File({
+                filename: 'public/logs/rtc_logs.log',
+              }),
+            ]
+          : [
+              new transports.Console({
+                format: colorize({ all: true }),
+              }),
+            ],
     });
   }
 
@@ -53,18 +65,18 @@ export class LoggerService extends ConsoleLogger {
   }
 
   log(message: string, ...meta: any[]) {
-    this.logger.info(message, ...meta);
+    this.logger.info(message, meta);
   }
 
   warn(message: string, ...meta: any[]) {
-    this.logger.warn(message, ...meta);
+    this.logger.warn(message, meta);
   }
 
   error(message: string, ...meta: any[]) {
-    this.logger.error(message, ...meta);
+    this.logger.error(message, meta);
   }
 
   debug(message: string, ...meta: any[]) {
-    this.logger.debug(message, ...meta);
+    this.logger.debug(message, meta);
   }
 }

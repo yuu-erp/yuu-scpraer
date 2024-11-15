@@ -43,18 +43,20 @@ export class MangaService {
   }
 
   async getMangaById(id: string) {
+    console.log('getMangaById - id: ', id);
     const manga = await this.prismaService.manga.findUnique({
       where: { id },
       include: { chapters: true },
     });
-
     if (!manga) {
       throw new NotFoundException(`Manga with ID ${id} not found`);
     }
+    console.log('getMangaById - manga: ', manga);
     if (manga.anilistId) {
       const dataAnilist = await this.anilistService.getMangaById(
         manga.anilistId,
       );
+      console.log('getMangaById - dataAnilist: ', dataAnilist);
       return { ...manga, ...dataAnilist };
     }
     return manga;

@@ -1,76 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/service/prismaService/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { MangaResponse } from 'src/responses/manga.response';
 import { MangaResponseDto } from './dto/manga-response.dto';
-import { PaginationResponseDto } from 'src/dto/pagination-response.dto';
-import { MangaType } from 'src/types/utils';
-import { AnilistService } from 'src/service/anilistService/anilist.service';
+import { PaginationPayloadDto } from 'src/responses/dto/pagination-payload.dto';
+import { PaginationResponseDto } from 'src/responses/dto/pagination-response.dto';
 
 @Injectable()
 export class MangaService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly anilistService: AnilistService,
-  ) {}
+  constructor(private readonly mangaResponse: MangaResponse) {}
 
   async getAllMangas(
-    page: number,
-    limit: number,
-    type: MangaType = MangaType.All,
+    query: PaginationPayloadDto,
   ): Promise<PaginationResponseDto<MangaResponseDto>> {
-    const skip = (page - 1) * limit;
-    const whereCondition = this.getWhereCondition(type);
-
-    const [mangas, total] = await Promise.all([
-      this.prismaService.manga.findMany({
-        skip,
-        take: limit,
-        where: whereCondition,
-      }),
-      this.prismaService.manga.count({
-        where: whereCondition,
-      }),
-    ]);
-
-    return {
-      data: mangas,
-      meta: {
-        totalItems: total,
-        currentPage: page,
-        itemsPerPage: limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+    return this.mangaResponse.findAll(query);
   }
 
   async getMangaById(id: string) {
-    console.log('getMangaById - id: ', id);
-    const manga = await this.prismaService.manga.findUnique({
-      where: { id },
-      include: { chapters: true },
-    });
-    if (!manga) {
-      throw new NotFoundException(`Manga with ID ${id} not found`);
-    }
-    console.log('getMangaById - manga: ', manga);
-    if (manga.anilistId) {
-      const dataAnilist = await this.anilistService.getMangaById(
-        manga.anilistId,
-      );
-      console.log('getMangaById - dataAnilist: ', dataAnilist);
-      return { ...manga, ...dataAnilist };
-    }
-    return manga;
-  }
-
-  // Hàm hỗ trợ để lấy điều kiện "where" tùy theo type
-  private getWhereCondition(type: MangaType) {
-    switch (type) {
-      case MangaType.Anilist:
-        return { anilistId: { not: null } }; // Lọc manga có anilistId
-      case MangaType.NoAnilist:
-        return { anilistId: null }; // Lọc manga không có anilistId
-      default:
-        return {}; // Lọc tất cả
-    }
+    return this.mangaResponse.findOne(id);
   }
 }

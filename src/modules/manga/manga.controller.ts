@@ -7,10 +7,9 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { MangaService } from './manga.service';
 import { XApiKeyGuard } from 'src/guards/x-api-key.guard';
-import { PaginationPayloadDto } from 'src/dto/pagination-payload.dto';
-import { MangaType } from 'src/types/utils';
+import { MangaService } from './manga.service';
+import { PaginationPayloadDto } from 'src/responses/dto/pagination-payload.dto';
 
 @Controller('manga')
 export class MangaController {
@@ -19,11 +18,8 @@ export class MangaController {
   @UseGuards(XApiKeyGuard)
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getAllMangas(
-    @Query() query: PaginationPayloadDto,
-    @Query('type') type: MangaType = MangaType.All,
-  ) {
-    return this.mangaService.getAllMangas(query.page, query.limit, type);
+  async getAllMangas(@Query() query: PaginationPayloadDto) {
+    return this.mangaService.getAllMangas(query);
   }
 
   @UseGuards(XApiKeyGuard)

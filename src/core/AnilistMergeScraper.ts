@@ -30,6 +30,7 @@ export default class AnilistMergeScraper {
       const data = await this.anilistService.getIdByTitle(title, type);
       if (data) return data;
     }
+
     return null;
   }
 

@@ -61,6 +61,7 @@ export default class MangaNettruyenScraper extends MangaScraper {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getImages(_ids: GetImagesQuery): Promise<ImageSource[]> {
     return;
   }

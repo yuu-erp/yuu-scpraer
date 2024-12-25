@@ -16,6 +16,7 @@ export class XApiKeyGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request: Request = context.switchToHttp().getRequest();
+
     const apiKey = request.headers['x-api-key'];
 
     if (apiKey && apiKey === this.configurationService.apiKey) {
